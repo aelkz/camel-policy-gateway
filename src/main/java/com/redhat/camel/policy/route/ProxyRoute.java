@@ -42,7 +42,7 @@ public class ProxyRoute extends RouteBuilder {
 			//.post() // TODO
 			//.put() // TODO
 			//.delete() // TODO
-			.patch() // TODO
+			//.patch() // TODO
 			.enableCORS(true)
 			.get()
 				// curl -k -vvv http://localhost:8080 -H 'Accept: application/json'
