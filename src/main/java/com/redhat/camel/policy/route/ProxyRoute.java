@@ -49,7 +49,7 @@ public class ProxyRoute extends RouteBuilder {
 				// curl -k -vvv http://localhost:8081 -H 'Accept: application/json'
 				.route().to("direct:internal-rest")
 			.endRest()
-			.get("/get")
+			.get("/get") // esse /get corresponde ao path da URI que veio na chamada do proxy. Exemplo: https://xyz.com/foo -> .get(/"foo")
 				// EXAMPLE: curl -k -vvv http://www.postman-echo.com/get -H 'Accept: application/json' -x "http://0.0.0.0:8080"
 				.route().to("direct:internal-rest")
 			.endRest();
