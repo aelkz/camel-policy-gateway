@@ -17,9 +17,9 @@ curl -k -vvv http://localhost:8081 -H 'Accept: application/json' # will not act 
 
 ### TESTING (FAILED)
 
-'''
+```
 curl -k -vvv https://www.postman-echo.com/get -H 'Accept: application/json' -x "http://0.0.0.0:8080"
-'''
+```
 
 ### 3SCALE CAMEL POLICY TIPS
 ##### BACKEND REGISTRATION (WORKAROUND)
