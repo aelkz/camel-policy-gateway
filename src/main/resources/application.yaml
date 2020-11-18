@@ -1,0 +1,81 @@
+# =============================================
+# springboot 2 configurations
+# ---------------------------------------------
+spring:
+  application:
+    name: ${OPENSHIFT_APP_NAME:openbanking-admin-api}
+  datasource:
+    initialization-mode: never
+
+api:
+  title: ${OPENSHIFT_APP_NAME:openbanking-admin-api}
+  description: Banco do Nordeste - openbanking-admin-api
+  version: 1
+  hostname: ${OPENSHIFT_HOST_NAME:openbanking-admin-api.apps.openshift.com}
+
+logging:
+  config: classpath:logback.xml
+  level:
+    root: DEBUG
+
+# options from org.apache.camel.spring.boot.CamelConfigurationProperties can be configured here
+camel:
+  springboot:
+    name: ${OPENSHIFT_APP_NAME:openbanking-admin-api}
+    main-run-controller: true
+  component:
+    servlet:
+      mapping:
+        contextPath: /api/v${api.version}/*
+    jmxEnabled: true
+
+# lets listen on all ports to ensure we can be invoked from the pod ip address
+server:
+  address: 0.0.0.0
+  port: 8090
+
+# lets use a different management port in case you need to listen to HTTP requests on 8080
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - info
+          - health
+          - metrics
+          - jvm
+          - prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+  server:
+    port: 8091
+
+# =============================================
+# opentracing configurations
+# see: https://github.com/opentracing-contrib/java-spring-jaeger/blob/master/README.md
+# ---------------------------------------------
+opentracing:
+  jaeger:
+    enabled: true
+    service-name: ${OPENSHIFT_APP_NAME:openbanking-admin-api}
+    enable-b3-propagation: true
+    log-spans: true
+    const-sampler:
+      decision: true
+    udp-sender:
+      host: ${OPENSHIFT_JAEGER_HOST:localhost}
+      port: 6831
+    http-sender:
+      #url: http://jaeger-collector:14268/api/traces
+      url: ${OPENSHIFT_JAEGER_TRACE_API_URL:http://localhost:14268/api/traces}
+      # password:
+      # username:
+    expand-exception-logs: true
+    remote-reporter:
+      max-queue-size: 10000
+      flush-interval: 1000
+    tags:
+      - openbanking
+      - admin
