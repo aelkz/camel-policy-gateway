@@ -62,7 +62,7 @@ public class ProxyRoute extends RouteBuilder {
 			.to("https4://www.postman-echo.com/get?test=123&bridgeEndpoint=true&throwExceptionOnFailure=false")
 			.unmarshal().json(JsonLibrary.Jackson)
 			.process((e) -> {
-				System.out.println(":: request to backend forwarded");
+				System.out.println(":: request forwarded to backend");
 			});
 	}	
 	
