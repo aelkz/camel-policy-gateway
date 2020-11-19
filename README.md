@@ -7,6 +7,18 @@
 | GET,PUT,POST,DELETE,PATCH | <container-exposed> http://0.0.0.0:8080 | Proxy Endpoint |
 | GET,PUT,POST,DELETE,PATCH | <internal> http://0.0.0.0:8081 | Rest Endpoint that receives proxy requests |
 
+### SETUP
+
+```
+sudo mkdir /tls
+sudo chown -R raphael: /tls
+
+KEYSTORE_PASSWORD=$(openssl rand -base64 512 | tr -dc A-Z-a-z-0-9 | head -c 25)
+keytool -genkeypair -keyalg RSA -keysize 2048 -dname "CN=0.0.0.0" -alias https-key -keystore keystore.jks -storepass ${KEYSTORE_PASSWORD}
+echo ${KEYSTORE_PASSWORD}
+
+```
+
 ### TESTING (WORKING EXAMPLES)
 
 ```
@@ -18,6 +30,7 @@ curl -k -vvv http://localhost:8081 -H 'Accept: application/json' # will not act 
 ### TESTING (FAILED)
 
 ```
+from("netty4-http:proxy://0.0.0.0:8080")
 curl -k -vvv https://www.postman-echo.com/get -H 'Accept: application/json' -x "http://0.0.0.0:8080"
 ```
 
