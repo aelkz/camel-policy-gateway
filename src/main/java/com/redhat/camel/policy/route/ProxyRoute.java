@@ -4,67 +4,62 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.logging.Logger;
+import com.redhat.camel.policy.configuration.SSLProxyConfiguration;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.dataformat.JsonLibrary;
-import org.apache.camel.model.rest.RestBindingMode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProxyRoute extends RouteBuilder {
 	private static final Logger LOGGER = Logger.getLogger(ProxyRoute.class.getName());
 
+	@Autowired
+	SSLProxyConfiguration proxyConfig;
+
     @Override
     public void configure() throws Exception {
 		
-		from("netty4-http:proxy://0.0.0.0:8080")
+		//from("netty4-http:proxy://0.0.0.0:8080")
+		// see: https://camel.apache.org/components/latest/netty-http-component.html
+
+		/*
+		from("netty-http:proxy://0.0.0.0:"
+				+ proxyConfig.getPort()
+				+ "?ssl=true&keyStoreFile="
+				+ proxyConfig.getKeystoreDest()
+				+ "&passphrase="
+				+ proxyConfig.getKeystorePass()
+				+ "&trustStoreFile="
+				+ proxyConfig.getKeystoreDest())
+		 */
+
+		// from("netty4-http:proxy://0.0.0.0:8443"
+		from("netty-http:proxy://0.0.0.0:8443"
+				+ "?ssl=true&keyStoreFile="
+				+ "/tls/keystore.jks"
+				+ "&passphrase="
+				+ "yVQbjz6KEKQlkvo3o06AfQt7p"
+				+ "&trustStoreFile="
+				+ "/tls/keystore.jks")
 			.process((e) -> {
 				System.out.println("\n:: proxy received\n");
 			})
 			// &httpClient.redirectsEnabled=true
-			.toD("http4://0.0.0.0:8081/?throwExceptionOnFailure=false&connectionClose=false&bridgeEndpoint=true&copyHeaders=true")
+			/*
+			.toD("netty-http:"
+				+ "${headers." + Exchange.HTTP_SCHEME + "}://"
+				+ "${headers." + Exchange.HTTP_HOST + "}:"
+				+ "${headers." + Exchange.HTTP_PORT + "}"
+				+ "${headers." + Exchange.HTTP_PATH + "}")
+			*/
+			//.toD("http4://0.0.0.0:8081/?throwExceptionOnFailure=false&connectionClose=false&bridgeEndpoint=true&copyHeaders=true")
 			.process((e) -> {
 				System.out.println("\n:: route processing ended\n");
 			});
 		
-		restConfiguration()
-			//.contextPath("/")
-			.enableCORS(true)
-			.corsHeaderProperty("Access-Control-Allow-Headers", "Authorization, Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Content-Length")
-			.bindingMode(RestBindingMode.json)
-			.dataFormatProperty("prettyPrint", "true")
-			.host("0.0.0.0")
-			.port(8081);
-		 
-		rest()
-			//.skipBindingOnErrorCode(false) // enable json marshalling for body in case of errors
-			//.post() // TODO
-			//.put() // TODO
-			//.delete() // TODO
-			//.patch() // TODO
-			.enableCORS(true)
-			.get()
-				// curl -k -vvv http://localhost:8080 -H 'Accept: application/json'
-				// curl -k -vvv http://localhost:8081 -H 'Accept: application/json'
-				.route().to("direct:internal-rest")
-			.endRest()
-			.get("/get") // esse /get corresponde ao path da URI que veio na chamada do proxy. Exemplo: https://xyz.com/foo -> .get(/"foo") (VERIFICAR SE É POSSÍVEL EXTRAIR O PATH DINAMICAMENTE)
-				// EXAMPLE: curl -k -vvv http://www.postman-echo.com/get -H 'Accept: application/json' -x "http://0.0.0.0:8080"
-				.route().to("direct:internal-rest")
-			.endRest();
-
-		from("direct:internal-rest")
-			.process((e) -> {
-				System.out.println("\n:: internal-rest received\n");
-			})
-			.process(ProxyRoute::beforeRedirect)
-			.to("https4://www.postman-echo.com/get?test=123&bridgeEndpoint=true&throwExceptionOnFailure=false")
-			.unmarshal().json(JsonLibrary.Jackson)
-			.process((e) -> {
-				System.out.println(":: request forwarded to backend");
-			});
-	}	
+	}
 	
 	private static void beforeRedirect(final Exchange exchange) {
 		LOGGER.info("BEFORE REDIRECT");

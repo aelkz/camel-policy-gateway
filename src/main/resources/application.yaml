@@ -79,3 +79,16 @@ opentracing:
     tags:
       - openbanking
       - admin
+
+# =============================================
+# SSL configuration
+# ---------------------------------------------
+proxy:
+  # http or https
+  schema: ${OPENSHIFT_PROXY_SCHEMA:https}
+  port: ${OPENSHIFT_PROXY_PORT:8443}
+  keystore:
+    #dest: ${OPENSHIFT_PROXY_KEYSTORE_DESTINATION:/deployments/data/keystore.jks}
+    #pass: ${OPENSHIFT_PROXY_KEYSTORE_PASSWORD:changeme}
+    dest: ${OPENSHIFT_JETTY_KEYSTORE_DESTINATION:/tls/keystore.jks}
+    pass: ${OPENSHIFT_JETTY_KEYSTORE_PASSWORD:yVQbjz6KEKQlkvo3o06AfQt7p}
